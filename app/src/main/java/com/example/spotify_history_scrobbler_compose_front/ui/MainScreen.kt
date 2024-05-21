@@ -1,6 +1,8 @@
 package com.example.spotify_history_scrobbler_compose_front.ui
 
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -17,8 +19,8 @@ fun MainScreen(viewModel: MainViewModel) {
         if (data.isEmpty()) {
             Text("Loading...", modifier = Modifier.padding(16.dp))
         } else {
-            Column(modifier = Modifier.padding(16.dp)) {
-                data.forEach { item ->
+            LazyColumn(modifier = Modifier.padding(16.dp)) {
+                items(data) { item ->
                     Text(text = "${item.name}: ${item.reproductions}")
                 }
             }

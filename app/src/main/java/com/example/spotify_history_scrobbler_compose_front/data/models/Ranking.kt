@@ -4,3 +4,11 @@ data class Ranking(
     val name: String,
     val reproductions: Int
 )
+
+/*
+data class RankingWithImage(
+    val name: String,
+    val reproductions: Int,
+    val imageUrl: String
+)
+*/
