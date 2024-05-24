@@ -63,4 +63,7 @@ dependencies {
     //coil = TESTING
     implementation("io.coil-kt:coil-compose:1.4.0")
 
+    //testing
+    implementation("com.squareup.okhttp3:okhttp:4.9.1")
+    implementation("com.squareup.okhttp3:logging-interceptor:4.9.1")
 }
