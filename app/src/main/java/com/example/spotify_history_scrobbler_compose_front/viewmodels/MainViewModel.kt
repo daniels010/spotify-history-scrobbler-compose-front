@@ -41,9 +41,9 @@ class MainViewModel : ViewModel() {
     private fun getImageUrlForRanking(name: String): String {
         // Return the URL of the image based on the name of the artist
         return when (name) {
-            "Artista 1" ->  "https://blog.iprocess.com.br/wp-content/uploads/2021/11/placeholder-300x200.png"
-            "Artista 2" ->  "https://blog.iprocess.com.br/wp-content/uploads/2021/11/placeholder-300x200.png"
-            else ->  "https://blog.iprocess.com.br/wp-content/uploads/2021/11/placeholder-300x200.png"
+            "Artista 1" ->  "https://ia801309.us.archive.org/28/items/mbid-f268b8bc-2768-426b-901b-c7966e76de29/mbid-f268b8bc-2768-426b-901b-c7966e76de29-12750224075_thumb500.jpg"
+            "Artista 2" ->  "https://ia801309.us.archive.org/28/items/mbid-f268b8bc-2768-426b-901b-c7966e76de29/mbid-f268b8bc-2768-426b-901b-c7966e76de29-12750224075_thumb500.jpg"
+            else ->  "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSF5tqNPhK9IHFnRli_p0qGopUn5bHP7o3uyMINWT5-YQ&s"
         }
     }
 }
