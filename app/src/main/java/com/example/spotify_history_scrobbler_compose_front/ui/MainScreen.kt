@@ -5,13 +5,11 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Card
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
@@ -22,14 +20,35 @@ import com.example.spotify_history_scrobbler_compose_front.viewmodels.MainViewMo
 @Composable
 fun MainScreen(viewModel: MainViewModel) {
     val data by viewModel.data.collectAsState()
+    val isLoading by viewModel.isLoading.collectAsState()
+    val isIncrementalLoading by viewModel.isIncrementalLoading.collectAsState()
 
     Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
-        if (data.isEmpty()) {
-            Text("Loading...", modifier = Modifier.padding(16.dp))
+        if (isLoading && data.isEmpty()) {
+            // Exibir indicador de carregamento inicial
+            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                CircularProgressIndicator()
+            }
         } else {
             LazyColumn(modifier = Modifier.padding(16.dp)) {
                 items(data) { item ->
                     RankingItem(item)
+                }
+                item {
+                    if (isIncrementalLoading) {
+                        Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+                            CircularProgressIndicator()
+                        }
+                    } else {
+                        Button(
+                            onClick = { viewModel.loadMore() },
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(16.dp)
+                        ) {
+                            Text("Load More")
+                        }
+                    }
                 }
             }
         }
@@ -40,7 +59,6 @@ fun MainScreen(viewModel: MainViewModel) {
 fun RankingItem(item: Ranking) {
     Card(
         shape = RoundedCornerShape(8.dp),
-        //elevation = 8.dp,
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 8.dp)
@@ -58,6 +76,11 @@ fun RankingItem(item: Ranking) {
                 Text(
                     text = item.name,
                     style = MaterialTheme.typography.headlineSmall
+                )
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(
+                    text = item.name1,
+                    style = MaterialTheme.typography.bodyLarge
                 )
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(

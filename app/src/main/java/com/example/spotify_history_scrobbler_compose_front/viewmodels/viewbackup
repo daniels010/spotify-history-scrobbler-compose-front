@@ -22,29 +22,15 @@ class MainViewModel : ViewModel() {
     private val _data = MutableStateFlow<List<Ranking>>(emptyList())
     val data: StateFlow<List<Ranking>> = _data
 
-    private val _isLoading = MutableStateFlow(true)
-    val isLoading: StateFlow<Boolean> = _isLoading
-
-    private val _isIncrementalLoading = MutableStateFlow(false)
-    val isIncrementalLoading: StateFlow<Boolean> = _isIncrementalLoading
-
-    private val pageSize = 5
-    private var currentPage = 0
-
     init {
-        loadMore()
+        fetchAlbums()
     }
 
-    fun loadMore() {
-        if (_isIncrementalLoading.value) return
-
-        _isIncrementalLoading.value = true
+    private fun fetchAlbums() {
         viewModelScope.launch {
             try {
-                val allRankings = api.fetchAlbums()
-                val start = currentPage * pageSize
-                val end = minOf(start + pageSize, allRankings.size)
-                val nextRankings = allRankings.subList(start, end).map { ranking ->
+                val rankingsFromApi = api.fetchAlbums()
+                val rankingsWithImages = rankingsFromApi.map { ranking ->
                     Ranking(
                         name = ranking.name,
                         name1 = ranking.name1,
@@ -52,42 +38,48 @@ class MainViewModel : ViewModel() {
                         imageUrl = "https://via.placeholder.com/150" // Use placeholder image initially
                     )
                 }
-                currentPage++
+                _data.value = rankingsWithImages
 
-                // Fetch album cover images for the new items
-                val updatedRankings = nextRankings.map { ranking ->
-                    val imageUrl = getAlbumCoverUrl(ranking.name, ranking.name1)
-                    ranking.copy(imageUrl = imageUrl)
+                // Fetch album cover images for visible albums
+                rankingsWithImages.forEach { ranking ->
+                    viewModelScope.launch {
+                        try {
+                            val imageUrl = getAlbumCoverUrl(ranking.name)
+                            val updatedRanking = ranking.copy(imageUrl = imageUrl)
+                            _data.emit(_data.value.map { if (it.name == ranking.name) updatedRanking else it })
+                        } catch (e: Exception) {
+                            // Log the exception
+                            Log.e("MainViewModel", "Error fetching album cover for ${ranking.name}", e)
+                        }
+                    }
                 }
-
-                // Update the data state with the new rankings with images
-                _data.value += updatedRankings
-
             } catch (e: Exception) {
+                // Log the exception
                 Log.e("MainViewModel", "Error fetching albums", e)
-            } finally {
-                _isIncrementalLoading.value = false
+                // Handle exceptions
+                _data.value = listOf(Ranking("Error", "Error", 0, "https://via.placeholder.com/150"))
             }
         }
     }
 
-    private suspend fun getAlbumCoverUrl(albumName: String, artistName: String): String {
+    private suspend fun getAlbumCoverUrl(album: String): String {
         return withContext(Dispatchers.IO) {
             try {
-                // Simplificar nome do álbum se tiver versão especial
-                val simplifiedAlbumName = if (albumName.contains(":") || albumName.contains("-")) {
-                    albumName.split(Regex("[\\:\\-]")).firstOrNull() ?: albumName
-                } else {
-                    albumName
-                }
-                val query = "artist:\"$artistName\" AND release:\"$simplifiedAlbumName\""
+                val query = "release:\"$album\""
                 val searchResponse = musicBrainzApi.searchRelease(query = query)
-                for (release in searchResponse.releases) {
+                Log.d("MainViewModel", "Search response for $album: $searchResponse")
+
+                val release = searchResponse.releases.firstOrNull()
+                if (release != null) {
                     val releaseId = release.id
                     try {
+                        // Verify if the cover art exists
                         val coverArtResponse = coverArtApi.getCoverArt(releaseId)
                         if (coverArtResponse.images.isNotEmpty()) {
+                            Log.d("MainViewModel", "Cover art found for release ID: $releaseId")
                             return@withContext "https://coverartarchive.org/release/$releaseId/front-250.jpg"
+                        } else {
+                            Log.e("MainViewModel", "No cover art found for release ID: $releaseId")
                         }
                     } catch (e: retrofit2.HttpException) {
                         if (e.code() == 404) {
@@ -98,10 +90,12 @@ class MainViewModel : ViewModel() {
                     } catch (e: Exception) {
                         Log.e("MainViewModel", "Error fetching cover art for release ID: $releaseId", e)
                     }
+                } else {
+                    Log.e("MainViewModel", "No release found for album: $album")
                 }
                 "https://via.placeholder.com/150"
             } catch (e: Exception) {
-                Log.e("MainViewModel", "Error fetching album cover URL for $albumName", e)
+                Log.e("MainViewModel", "Error fetching album cover URL for $album", e)
                 "https://via.placeholder.com/150"
             }
         }

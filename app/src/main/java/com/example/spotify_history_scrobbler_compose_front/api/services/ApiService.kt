@@ -9,7 +9,7 @@ interface ApiService {
     @GET("/artist-ranking")
     suspend fun fetchArtists(): List<Ranking>
 
-    @GET("/album-ranking")
+    @GET("/album-rankingnew")
     suspend fun fetchAlbums(): List<Ranking>
 
     @GET("/track-ranking")
