@@ -12,6 +12,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import android.util.Log
+import com.example.spotify_history_scrobbler_compose_front.R
 
 class MainViewModel : ViewModel() {
 
@@ -49,12 +50,14 @@ class MainViewModel : ViewModel() {
                         name = ranking.name,
                         name1 = ranking.name1,
                         reproductions = ranking.reproductions,
-                        imageUrl = "https://via.placeholder.com/150" // Use placeholder image initially
+                        //old placeholder link: https://via.placeholder.com/150
+                        //subbed by local placeholder img
+                        imageUrl = "android.resource://com.example.spotify_history_scrobbler_compose_front/${R.drawable.placeholder}" // Use placeholder image initially
                     )
                 }
                 currentPage++
 
-                // Fetch album cover images for the new items
+                // fetch album cover images for the new items
                 val updatedRankings = nextRankings.map { ranking ->
                     val imageUrl = getAlbumCoverUrl(ranking.name, ranking.name1)
                     ranking.copy(imageUrl = imageUrl)
@@ -99,10 +102,10 @@ class MainViewModel : ViewModel() {
                         Log.e("MainViewModel", "Error fetching cover art for release ID: $releaseId", e)
                     }
                 }
-                "https://via.placeholder.com/150"
+                "android.resource://com.example.spotify_history_scrobbler_compose_front/${R.drawable.placeholder}"
             } catch (e: Exception) {
                 Log.e("MainViewModel", "Error fetching album cover URL for $albumName", e)
-                "https://via.placeholder.com/150"
+                "android.resource://com.example.spotify_history_scrobbler_compose_front/${R.drawable.placeholder}"
             }
         }
     }
