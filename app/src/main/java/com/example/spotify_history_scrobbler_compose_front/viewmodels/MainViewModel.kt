@@ -50,9 +50,10 @@ class MainViewModel : ViewModel() {
                         name = ranking.name,
                         name1 = ranking.name1,
                         reproductions = ranking.reproductions,
+                        //used placeholder initially
                         //old placeholder link: https://via.placeholder.com/150
                         //subbed by local placeholder img
-                        imageUrl = "android.resource://com.example.spotify_history_scrobbler_compose_front/${R.drawable.placeholder}" // Use placeholder image initially
+                        imageUrl = "android.resource://com.example.spotify_history_scrobbler_compose_front/${R.drawable.placeholder}"
                     )
                 }
                 currentPage++
@@ -79,7 +80,7 @@ class MainViewModel : ViewModel() {
             try {
                 // Simplificar nome do álbum se tiver versão especial
                 val simplifiedAlbumName = if (albumName.contains(":") || albumName.contains("-")) {
-                    albumName.split(Regex("[\\:\\-]")).firstOrNull() ?: albumName
+                    albumName.split(Regex("[:\\-]")).firstOrNull() ?: albumName
                 } else {
                     albumName
                 }
